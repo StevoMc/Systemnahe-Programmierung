@@ -10,19 +10,19 @@
 
 /*
  ?  SET_BIT
- *  -> Macro for setting bit in given position to 1 by generating a mask 
+ *  -> Macro for setting bit in given position to 1 by generating a mask
  *     in the proper bit location and ORing (|) x with the mask.
  */
 #define SET_BIT(x, pos) (x |= (1U << pos))
 
-/* 
+/*
  ?   TOOGLE_BIT
- *  -> Macro for toggling bit in given position to 1 by generating a mask 
- *     in the proper bit location and ex-ORing x with the mask. 
+ *  -> Macro for toggling bit in given position to 1 by generating a mask
+ *     in the proper bit location and ex-ORing x with the mask.
  */
 #define TOOGLE_BIT(x, pos) (x ^= (1U << pos))
 
-/* 
+/*
  ?  CLEAR_BIT
  *  -> Macro for clearing bit in given position to 0 by generating a mask
  *     in the proper bit location and Anding x with the mask.
@@ -31,14 +31,24 @@
 
 int Ampel(void);
 int Input(void);
+int Interrupt(void);
 int delay = 250;
+
+ISR(INT1_vect)
+{
+    PORTB = 0xFF;
+}
+
+ISR(INT0_vect)
+{
+    PORTB = 0x00;
+}
 
 int main(void)
 {
-    lrint(GET_BIT(0b01, 0));
-
-    // Input();
     // Ampel();
+    // Input();
+    Interrupt();
 }
 
 int Ampel(void)
@@ -80,6 +90,37 @@ int Ampel(void)
     }
 }
 
+int Interrupt(void)
+{
+    DDRB = 0xFF;
+    PORTB = 0xFF;
+
+    DDRD &= ~(1 << DDD2); // Clear Pin PD2
+    // PD2 (PCINT0 pin) is now an input
+
+    PORTD |= (1 << PORTD2); // Turn on the Pull-up
+    // PD2 is now  an input with pull-up enabled
+
+    DDRD &= ~(1 << DDD3); // Clear Pin PD3
+    // PD3 (PCINT1 pin) is now an input
+
+    PORTD |= (1 << PORTD3); // Turn on the Pull-up
+    // PD3 is now an input with pull-up enabled
+
+    EICRA |= (1 << ISC00); // Set INT0 to trigger on ANY logic change
+    EICRA |= (1 << ISC10); // Set INT1 to trigger on ANY logic change
+
+    EIMSK |= (1 << INT0); // Turn on INT0
+    EIMSK |= (1 << INT1); // Turn on INT1
+
+    sei(); // Turn on interrupts
+
+    while (1)
+    {
+        // While true,
+    }
+}
+
 int Input(void)
 {
     DDRD = (1 << DDB2);
@@ -94,12 +135,12 @@ int Input(void)
     {
         if (!(PIND & (1 << PIND2)))
         {
-            //PORTB |= (1 << PORTB5);
+            // PORTB |= (1 << PORTB5);
             PORTB = (1 << PORTB3);
         }
         if (!(PIND & (1 << PIND3)))
         {
-            //PORTB &= ~(1 << PORTB5);
+            // PORTB &= ~(1 << PORTB5);
             PORTB = 0;
         }
     }
