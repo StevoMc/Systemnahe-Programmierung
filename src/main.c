@@ -40,20 +40,20 @@ int Input(void);
 int InterruptTask(void);
 int Pipser(void);
 
-int delay = 250;
-int frequency = 440;
-
 int main(void)
 {
-    Pipser();
-    // InterruptTask();
-    // Input();
     // Ampel();
+    // Input();
+    // InterruptTask();
+    Pipser();
 }
 
 // Aufgabe: Programmiere eine Ampel
 int Ampel(void)
 {
+
+    int delay = 250;
+
     DDRB |= (1 << DDB2) | (1 << DDB3) | (1 << DDB4);
 
     /* Clear Bits */
@@ -176,6 +176,8 @@ ISR(INT1_vect)
 // Aufgabe: Pipser mit 440 hz pipsen lasssen
 int Pipser(void)
 {
+    int frequency = 440;
+
     TCCR0A |= (1 << WGM01); // Set the Timer Mode to CTC
 
     OCR0A = 70; // Set the value that you want to count to
