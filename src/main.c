@@ -163,16 +163,6 @@ int InterruptTask(void)
     }
 }
 
-ISR(INT0_vect) // Interrrupt INT0
-{
-    PORTB = 0x00;
-}
-
-ISR(INT1_vect)
-{
-    PORTB = 0xFF;
-}
-
 // Aufgabe: Pipser mit 440 hz pipsen lasssen
 int Pipser(void)
 {
@@ -213,4 +203,14 @@ ISR(TIMER0_COMPA_vect)
 {
     // TOOGLE_BIT(PORTB, PORTB5);
     PORTB ^= (1U << PORTB5);
+}
+
+ISR(INT0_vect) // Interrrupt INT0
+{
+    PORTB = 0x00;
+}
+
+ISR(INT1_vect)
+{
+    PORTB = 0xFF;
 }
