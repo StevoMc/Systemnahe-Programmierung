@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #define F_CPU 16000000UL
 
@@ -31,26 +32,16 @@
 
 int Ampel(void);
 int Input(void);
-int Interrupt(void);
 int delay = 250;
-
-ISR(INT1_vect)
-{
-    PORTB = 0xFF;
-}
-
-ISR(INT0_vect)
-{
-    PORTB = 0x00;
-}
 
 int main(void)
 {
-    // Ampel();
-    // Input();
     Interrupt();
+    // Input();
+    // Ampel();
 }
 
+// Aufgabe: Programmiere eine Ampel
 int Ampel(void)
 {
     DDRB |= (1 << DDB2) | (1 << DDB3) | (1 << DDB4);
@@ -90,37 +81,7 @@ int Ampel(void)
     }
 }
 
-int Interrupt(void)
-{
-    DDRB = 0xFF;
-    PORTB = 0xFF;
-
-    DDRD &= ~(1 << DDD2); // Clear Pin PD2
-    // PD2 (PCINT0 pin) is now an input
-
-    PORTD |= (1 << PORTD2); // Turn on the Pull-up
-    // PD2 is now  an input with pull-up enabled
-
-    DDRD &= ~(1 << DDD3); // Clear Pin PD3
-    // PD3 (PCINT1 pin) is now an input
-
-    PORTD |= (1 << PORTD3); // Turn on the Pull-up
-    // PD3 is now an input with pull-up enabled
-
-    EICRA |= (1 << ISC00); // Set INT0 to trigger on ANY logic change
-    EICRA |= (1 << ISC10); // Set INT1 to trigger on ANY logic change
-
-    EIMSK |= (1 << INT0); // Turn on INT0
-    EIMSK |= (1 << INT1); // Turn on INT1
-
-    sei(); // Turn on interrupts
-
-    while (1)
-    {
-        // While true,
-    }
-}
-
+// Aufgabe: Toggle Onboard Lamp with button
 int Input(void)
 {
     DDRD = (1 << DDB2);
@@ -144,4 +105,57 @@ int Input(void)
             PORTB = 0;
         }
     }
+}
+
+// Aufgabe: Schalte mit einem Taster alle Lampen an und mit dem anderen Taster aus
+int Interrupt(void)
+{
+
+    /**
+    // TODO:
+    - Pull-UP ?
+        -> Reaction auf Erdung (Kein Strom)
+    */
+
+    DDRB = 0xFF;
+    PORTB = 0xFF;
+
+    CLEAR_BIT(DDRD, DDD2);
+    // DDRD &= ~(1 << DDD2); // Clear Pin PD2
+    // PD2 (PCINT0 pin) is now an input
+
+    CLEAR_BIT(DDRD, DDD3);
+    // DDRD &= ~(1 << DDD3); // Clear Pin PD3
+    // PD3 (PCINT1 pin) is now an input
+
+    SET_BIT(PORTD, PORTD2);
+    // PORTD |= (1 << PORTD2); // Turn on the Pull-up
+    // PD2 is now  an input with pull-up enabled
+
+    SET_BIT(PORTD, PORTD3);
+    // PORTD |= (1 << PORTD3); // Turn on the Pull-up
+    // PD3 is now an input with pull-up enabled
+
+    EICRA |= (1 << ISC00); // Set INT0 to trigger on ANY logic change
+    EICRA |= (1 << ISC10); // Set INT1 to trigger on ANY logic change
+
+    EIMSK |= (1 << INT0); // Turn on INT0
+    EIMSK |= (1 << INT1); // Turn on INT1
+
+    sei(); // Turn on interrupts
+
+    while (1)
+    {
+        // While true,
+    }
+}
+
+ISR(INT0_vect) // Interrrupt INT0
+{
+    PORTB = 0x00;
+}
+
+ISR(INT1_vect)
+{
+    PORTB = 0xFF;
 }
