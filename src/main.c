@@ -37,11 +37,16 @@
 
 int Ampel(void);
 int Input(void);
+int InterruptTask(void);
+int Pipser(void);
+
 int delay = 250;
+int frequency = 440;
 
 int main(void)
 {
-    InterruptTask();
+    Pipser();
+    // InterruptTask();
     // Input();
     // Ampel();
 }
@@ -166,4 +171,29 @@ ISR(INT0_vect) // Interrrupt INT0
 ISR(INT1_vect)
 {
     PORTB = 0xFF;
+}
+
+// Aufgabe: Pipser mit 440 hz pipsen lasssen
+int Pipser(void)
+{
+    TCCR0A |= (1 << WGM01); // Set the Timer Mode to CTC
+
+    OCR0A = 70; // Set the value that you want to count to
+
+    TIMSK0 |= (1 << OCIE0A); // Set the ISR COMPA vect
+
+    sei(); // enable interrupts
+
+    TCCR0B |= (1 << CS02);
+
+    while (1)
+    {
+        // while true
+    }
+}
+
+ISR(TIMER0_COMPA_vect)
+{
+    // TOOGLE_BIT(PORTB, PORTB5);
+    PORTB ^= (1U << PORTB5);
 }
