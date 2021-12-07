@@ -1,3 +1,8 @@
+/**
+ * @author StevoMc
+ * @date 07.12.2021
+ */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -36,7 +41,7 @@ int delay = 250;
 
 int main(void)
 {
-    Interrupt();
+    InterruptTask();
     // Input();
     // Ampel();
 }
@@ -108,7 +113,7 @@ int Input(void)
 }
 
 // Aufgabe: Schalte mit einem Taster alle Lampen an und mit dem anderen Taster aus
-int Interrupt(void)
+int InterruptTask(void)
 {
 
     /**
@@ -136,6 +141,9 @@ int Interrupt(void)
     // PORTD |= (1 << PORTD3); // Turn on the Pull-up
     // PD3 is now an input with pull-up enabled
 
+    /*
+     ! EICRA: THIS IS IMPORTANT
+     */
     EICRA |= (1 << ISC00); // Set INT0 to trigger on ANY logic change
     EICRA |= (1 << ISC10); // Set INT1 to trigger on ANY logic change
 
