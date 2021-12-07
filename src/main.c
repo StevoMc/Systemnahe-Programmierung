@@ -176,21 +176,36 @@ ISR(INT1_vect)
 // Aufgabe: Pipser mit 440 hz pipsen lasssen
 int Pipser(void)
 {
-    int frequency = 440;
+    DDRB = 0xFF;  // alle B's sind outputs
+    PORTB = 0x00; // set all outputs to 0
 
-    TCCR0A |= (1 << WGM01); // Set the Timer Mode to CTC
+    CLEAR_BIT(DDRD, DDD2); // activate input
+    CLEAR_BIT(DDRD, DDD3);
 
-    OCR0A = 70; // Set the value that you want to count to
+    SET_BIT(PORTD, PORTD2); // pull up
+    SET_BIT(PORTD, PORTD3);
 
-    TIMSK0 |= (1 << OCIE0A); // Set the ISR COMPA vect
+    // ---------FOLLOWING:-INTERRUPTS-----------------
 
-    sei(); // enable interrupts
+    SET_BIT(EICRA, ISC00); // interrupt on toggle
+    SET_BIT(EICRA, ISC10); // Sagt nur wie sich der Interrupt verhalten soll
 
-    TCCR0B |= (1 << CS02);
+    SET_BIT(EIMSK, INT1); // enables specific interrupt on Pin D2
+    SET_BIT(EIMSK, INT0); // " on Pin D3
+
+    sei(); // enables all interrupts
+
+    // TIMSK0 = 0xFF;
+    // setBit(TIMSK0,OCIE0A) // enables interrupts von timer | gegenstück zu EIMSK
+    TIMSK0 |= (1 << OCIE0A);
+    SET_BIT(TCCR0A, WGM01); // sets mode to CTC
+    OCR0A = 70;             // obere Grenze für coutner
+
+    SET_BIT(TCCR0B, CS02); // set prescaler to clock/256 and activate
 
     while (1)
     {
-        // while true
+        // while true,
     }
 }
 
